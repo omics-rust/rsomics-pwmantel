@@ -79,7 +79,47 @@ impl DistanceMatrix {
             )));
         }
 
-        Ok(DistanceMatrix { ids, data, n })
+        let dm = DistanceMatrix { ids, data, n };
+        dm.validate(source)?;
+        Ok(dm)
+    }
+
+    /// Reject matrices skbio's `DistanceMatrix` constructor would reject: the
+    /// raggedness/label/numeric checks in `read` accept a corrupted matrix that
+    /// still yields a confident wrong correlation, so mirror skbio + scipy
+    /// `squareform` here. Exact comparison, matching skbio: an asymmetry of
+    /// 1e-12 raises. Negative distances are allowed.
+    fn validate(&self, source: &str) -> Result<()> {
+        let n = self.n;
+
+        let mut seen = std::collections::HashSet::with_capacity(n);
+        for id in &self.ids {
+            if !seen.insert(id.as_str()) {
+                return Err(RsomicsError::InvalidInput(format!(
+                    "{source}: distance matrix ids must be unique; duplicate id '{id}'"
+                )));
+            }
+        }
+
+        for i in 0..n {
+            if self.data[i * n + i] != 0.0 {
+                return Err(RsomicsError::InvalidInput(format!(
+                    "{source}: distance matrix diagonal must be zero"
+                )));
+            }
+        }
+
+        for i in 0..n {
+            for j in (i + 1)..n {
+                if self.data[i * n + j] != self.data[j * n + i] {
+                    return Err(RsomicsError::InvalidInput(format!(
+                        "{source}: distance matrix must be symmetric and cannot contain NaNs"
+                    )));
+                }
+            }
+        }
+
+        Ok(())
     }
 
     /// Reorder rows and columns onto `target`'s id order. skbio reorders the

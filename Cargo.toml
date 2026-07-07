@@ -1,6 +1,6 @@
 [package]
 name = "rsomics-pwmantel"
-version = "0.1.0"
+version = "0.1.1"
 description = "Pairwise Mantel test across N distance matrices (Pearson/Spearman + permutation p), scikit-bio pwmantel compatible"
 edition = "2024"
 rust-version = "1.91"
@@ -25,6 +25,7 @@ rayon = "1"
 
 [dev-dependencies]
 criterion = { version = "0.7", default-features = false, features = ["cargo_bench_support"] }
+tempfile = "3"
 
 [[bench]]
 name = "bench"
