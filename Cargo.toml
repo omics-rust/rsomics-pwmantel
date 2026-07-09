@@ -1,6 +1,6 @@
 [package]
 name = "rsomics-pwmantel"
-version = "0.1.1"
+version = "0.1.2"
 description = "Pairwise Mantel test across N distance matrices (Pearson/Spearman + permutation p), scikit-bio pwmantel compatible"
 edition = "2024"
 rust-version = "1.91"
